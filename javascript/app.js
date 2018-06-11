@@ -10,16 +10,19 @@ var gameController = {
     timeHolder : 0,
     // setup function
     setupGame : function(){
-
+        this.score = 0;
+        this.missed = 0;
+        $(".main-display-stuff").toggle()
     },
     // game end function
     endGame : function(){
-
+        $("#messages").html('Click "Play" to begin!<br />'+
+        '<button id="play" type="button" class="btn btn-primary text-white">PLAY</button>');
     },
     // question guess function
     guessAnswer : function(answer){
         // pause timer
-        // check & respond to answer
+        var correct = quizController.checkAnswer(answer);console.log(correct)
         // wait 2 seconds
         // request new question
     }
@@ -64,3 +67,22 @@ var quizController = {
     }
     // 
 }
+
+$( document ).ready(function() {
+    $("#top").text("Game loaded, initializing!");
+    gameController.endGame();
+
+
+    // all event listeners
+
+    // start game when play button is clicked
+    $("#play").on("click", function(){
+        gameController.setupGame();
+    })
+
+    // select answers when clicked
+    $(".answer-button").on("click", function(event){
+        var clickedNum = $(this).attr("btn-num");
+        gameController.guessAnswer(clickedNum);
+    })
+});
