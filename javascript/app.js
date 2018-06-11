@@ -24,6 +24,8 @@ var gameController = {
     // question guess function
     guessAnswer : function(answer){
         // pause timer
+        this.stopTimer();
+        // check answer
         var correct = quizController.checkAnswer(answer);
         // wait 2 seconds
         // request new question
@@ -95,7 +97,24 @@ var quizController = {
         answerSlots.splice(correctIndex, 1);
         // write the correct answer to the slot & set the answers array spot
         $("#button-"+correctIndex).text(response.correct_answer);
+        this.answers[correctIndex] = true;
+
+        // loop over incorrect answers and place randomly
+        response.incorrect_answers.forEach(function(value){
+            // decide which slot to use
+            var thisIndex = Math.floor(Math.random() * answerSlots.length);
+            // grab the value
+            var thisSlot = answerSlots[thisIndex];
+            // pull off array
+            answerSlots.splice(thisIndex, 1);
+            // write to slot
+            $("#button-"+thisSlot).text(value);
+        });
+
+        // show the question
         $(".main-display-stuff").toggle();
+
+        // start the timer
         gameController.startTimer();
     },
     // answer checker - this is just a getter for the answers array
