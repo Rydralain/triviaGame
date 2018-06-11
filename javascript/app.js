@@ -5,26 +5,52 @@ var gameController = {
     // number missed var
     missed : 0,
     // timer object placeholder
-    timerObject : {},
+    timeRemaining: 0,
     // timer held time var
-    timeHolder : 0,
+    timeRunning : false,
     // setup function
     setupGame : function(){
-        this.score = 0;
-        this.missed = 0;
-        $(".main-display-stuff").toggle()
+        this.correct = 0;
+        this.total = 0;
+        this.timeRemaining = 6;
+        quizController.getNewQuestion();
     },
     // game end function
     endGame : function(){
+        this.timeRunning = false;
         $("#messages").html('Click "Play" to begin!<br />'+
         '<button id="play" type="button" class="btn btn-primary text-white">PLAY</button>');
     },
     // question guess function
     guessAnswer : function(answer){
         // pause timer
-        var correct = quizController.checkAnswer(answer);console.log(correct)
+        var correct = quizController.checkAnswer(answer);
         // wait 2 seconds
         // request new question
+    },
+    // process stuff every second
+    runTick : function(){
+        if(this.timeRunning === true){
+            // stuff that happens when the timer is active
+
+            // decrement timer & display
+            this.timeRemaining--;
+            $("#timer").text(this.timeRemaining);
+
+            // check if time is out
+            if(this.timeRemaining <= 0){
+                // show endgame message
+                $("#top").text("You got "+this.correct+" out of "+this.total+"!");
+                // run endgame code
+                this.endGame()
+            }
+        }
+    },
+    startTimer : function(){
+
+    },
+    stopTimer : function(){
+
     }
 }
 
@@ -56,6 +82,7 @@ var quizController = {
     // Set new question - AJAX callback
     setNewQuestion(response){
         // display options and set answer bools
+        console.log(response);
     },
     // answer checker - this is just a getter for the answers array
     checkAnswer : function(answer){
@@ -69,11 +96,17 @@ var quizController = {
 }
 
 $( document ).ready(function() {
-    $("#top").text("Game loaded, initializing!");
+    $("#top").text("Are you ready?");
     gameController.endGame();
 
 
     // all event listeners
+
+    // global timer
+    var timer = setInterval(function(){
+        gameController.runTick();
+    }, 1000);
+
 
     // start game when play button is clicked
     $("#play").on("click", function(){
