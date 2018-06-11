@@ -47,10 +47,10 @@ var gameController = {
         }
     },
     startTimer : function(){
-
+        this.timeRunning = true;
     },
     stopTimer : function(){
-
+        this.timeRunning = false;
     }
 }
 
@@ -83,6 +83,20 @@ var quizController = {
     setNewQuestion(response){
         // display options and set answer bools
         console.log(response);
+
+        // show question
+        $("#question").text(response.question);
+
+        // an element for each possible answer slot
+        var answerSlots = [0, 1, 2, 3];
+        // grab one for the correct answer
+        var correctIndex = Math.floor(Math.random() * 3);
+        // take it out of the array
+        answerSlots.splice(correctIndex, 1);
+        // write the correct answer to the slot & set the answers array spot
+        $("#button-"+correctIndex).text(response.correct_answer);
+        $(".main-display-stuff").toggle();
+        gameController.startTimer();
     },
     // answer checker - this is just a getter for the answers array
     checkAnswer : function(answer){
