@@ -1,9 +1,9 @@
 // object to control game stuff
 var gameController = {
     // score var
-    score : 0,
+    correct : 0,
     // number missed var
-    missed : 0,
+    total : 0,
     // timer object placeholder
     timeRemaining: 0,
     // timer held time var
@@ -12,23 +12,41 @@ var gameController = {
     setupGame : function(){
         this.correct = 0;
         this.total = 0;
-        this.timeRemaining = 6;
+        this.timeRemaining = 60;
         quizController.getNewQuestion();
     },
     // game end function
     endGame : function(){
+        // stop timer
         this.timeRunning = false;
+        // offer to start the game
         $("#messages").html('Click "Play" to begin!<br />'+
         '<button id="play" type="button" class="btn btn-primary text-white">PLAY</button>');
+        // make sure the messages div is showing
+        $("#messages").css("display", "inline");
+        $("#quiz").css("display", "none");
     },
     // question guess function
     guessAnswer : function(answer){
         // pause timer
         this.stopTimer();
+        // switch to messages panel
+        $(".main-display-stuff").toggle();
         // check answer
         var correct = quizController.checkAnswer(answer);
-        // wait 2 seconds
-        // request new question
+        // update vars & post message
+        this.total++
+        if(correct === true){
+            this.correct ++;
+            $("#messages").html("Correct!");
+        } else {
+            $("#messages").html("Sorry, that's not right.");
+        }
+        // wait 1 second
+        setTimeout(function(){
+            // request new question
+            quizController.getNewQuestion();
+        }, 1000);
     },
     // process stuff every second
     runTick : function(){
@@ -53,6 +71,12 @@ var gameController = {
     },
     stopTimer : function(){
         this.timeRunning = false;
+    },
+    getIsRunning : function(){
+        if(this.timeRemaining > 0){
+            return true;
+        }
+        return false;
     }
 }
 
@@ -84,38 +108,41 @@ var quizController = {
     // Set new question - AJAX callback
     setNewQuestion(response){
         // display options and set answer bools
-        console.log(response);
+        
+        // check if game is still going
+        if(gameController.getIsRunning() === true){
 
-        // show question
-        $("#question").text(response.question);
+            // show question
+            $("#question").html(response.question);
 
-        // an element for each possible answer slot
-        var answerSlots = [0, 1, 2, 3];
-        // grab one for the correct answer
-        var correctIndex = Math.floor(Math.random() * 3);
-        // take it out of the array
-        answerSlots.splice(correctIndex, 1);
-        // write the correct answer to the slot & set the answers array spot
-        $("#button-"+correctIndex).text(response.correct_answer);
-        this.answers[correctIndex] = true;
+            // an element for each possible answer slot
+            var answerSlots = [0, 1, 2, 3];
+            // grab one for the correct answer
+            var correctIndex = Math.floor(Math.random() * 3);
+            // take it out of the array
+            answerSlots.splice(correctIndex, 1);
+            // write the correct answer to the slot & set the answers array spot
+            $("#button-"+correctIndex).text(response.correct_answer);
+            this.answers[correctIndex] = true;
 
-        // loop over incorrect answers and place randomly
-        response.incorrect_answers.forEach(function(value){
-            // decide which slot to use
-            var thisIndex = Math.floor(Math.random() * answerSlots.length);
-            // grab the value
-            var thisSlot = answerSlots[thisIndex];
-            // pull off array
-            answerSlots.splice(thisIndex, 1);
-            // write to slot
-            $("#button-"+thisSlot).text(value);
-        });
+            // loop over incorrect answers and place randomly
+            response.incorrect_answers.forEach(function(value){
+                // decide which slot to use
+                var thisIndex = Math.floor(Math.random() * answerSlots.length);
+                // grab the value
+                var thisSlot = answerSlots[thisIndex];
+                // pull off array
+                answerSlots.splice(thisIndex, 1);
+                // write to slot
+                $("#button-"+thisSlot).html(value);
+            });
 
-        // show the question
-        $(".main-display-stuff").toggle();
+            // show the question
+            $(".main-display-stuff").toggle();
 
-        // start the timer
-        gameController.startTimer();
+            // start the timer
+            gameController.startTimer();
+        }
     },
     // answer checker - this is just a getter for the answers array
     checkAnswer : function(answer){
